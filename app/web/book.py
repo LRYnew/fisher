@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2018/7/13 16:47
 # @Author  : YJob
-from flask import jsonify, request
+import json
+from flask import jsonify, request, render_template
 
 from app.libs.helper import is_isbn_or_key
 from app.spider.yushu_book import YuShuBook
@@ -34,8 +35,23 @@ def search():
             yushu_book.search_by_keyword(q, page)
         books.full(yushu_book, q)
 
+        return json.dumps(books, default=lambda obj: obj.__dict__)
         # jsonify 序列化方法
-        return jsonify(books)
+        # return jsonify(books)
     else:
         # return jsonify({"msg": "参数验证失败"})
         return jsonify(form.errors)
+
+
+@web.route('/test')
+def test():
+    r = {
+        "name": "WJob",
+        "age": 28
+    }
+    r1 = {
+        "name": "ZJob",
+        "age": 36
+    }
+
+    return render_template('test.html', r=r, r1=r1)
