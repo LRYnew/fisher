@@ -2,11 +2,11 @@
 # @Time    : 2018/7/13 16:47
 # @Author  : YJob
 import json
-from flask import jsonify, request, render_template
+from flask import jsonify, request, render_template, flash
 
 from app.libs.helper import is_isbn_or_key
 from app.spider.yushu_book import YuShuBook
-from app.view_models.book import BookCollectionViewModel
+from app.view_models.book import BookCollectionViewModel, BookViewModel
 from app.web.web import web
 from app.forms.book import SearchForm
 
@@ -19,12 +19,12 @@ def search():
     :return:
     """
     form = SearchForm(request.args)
+    books = BookCollectionViewModel()
     if form.validate():
         q = form.q.data.strip()
         page = form.page.data
         isbn_or_key = is_isbn_or_key(q)
 
-        books = BookCollectionViewModel()
         yushu_book = YuShuBook()
         if isbn_or_key == 'isbn':
             # 面向过程
@@ -35,12 +35,26 @@ def search():
             yushu_book.search_by_keyword(q, page)
         books.full(yushu_book, q)
 
-        return json.dumps(books, default=lambda obj: obj.__dict__)
+        # 对象进行序列化
+        # return json.dumps(books, default=lambda obj: obj.__dict__)
         # jsonify 序列化方法
         # return jsonify(books)
     else:
         # return jsonify({"msg": "参数验证失败"})
-        return jsonify(form.errors)
+        # return jsonify(form.errors)
+        flash('搜索的关键字不符合要求，请重新进行搜索')
+
+    return render_template('search_result.html', books=books, form=form)
+
+
+@web.route('/book/<isbn>/detail', endpoint='book_detail')
+def detail(isbn):
+    yushu_book = YuShuBook()
+    yushu_book.search_by_isbn(isbn)
+
+    book = BookViewModel(yushu_book.first)
+
+    return render_template('book_detail.html',book=book,gifts=[],wishes=[])
 
 
 @web.route('/test')

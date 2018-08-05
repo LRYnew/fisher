@@ -2,13 +2,11 @@
 # @Time    : 2018/7/14 21:23
 # @Author  : YJob
 from sqlalchemy import Column, Integer, String
-from flask_sqlalchemy import SQLAlchemy
+
+from app.models.base import Base
 
 
-db = SQLAlchemy()
-
-
-class Book(db.Model):
+class Book(Base):
     """
     书籍模型
     """
