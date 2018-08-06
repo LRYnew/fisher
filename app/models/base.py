@@ -22,4 +22,6 @@ class Base(db.Model):
         """
         for key, val in attr_dict.items():
             if hasattr(self, key) and key != 'id':
-                setattr(self. key, val)
+                if isinstance(val, list):
+                    val = '、'.join(val)
+                setattr(self, key, val)

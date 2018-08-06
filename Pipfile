@@ -10,6 +10,8 @@ wtforms = "*"
 flask-sqlalchemy = "*"
 cymysql = "*"
 flask-login = "*"
+flask-script = "*"
+flask-migrate = "*"
 
 [dev-packages]
 

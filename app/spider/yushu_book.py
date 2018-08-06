@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2018/7/13 10:42
 # @Author  : YJob
-from app.libs.httper import HTTP
 from flask import current_app
+
+from app import db
+from app.libs.httper import HTTP
+from app.models.book import Book
 
 
 class YuShuBook(object):
@@ -20,11 +23,13 @@ class YuShuBook(object):
         url = self.isbn_url.format(isbn)
         result = HTTP.get(url)
         self.__full_single(result)
+        self.__save_single(result)
 
     def search_by_keyword(self, keyword, page=1):
         url = self.keyword_url.format(keyword, current_app.config['PRE_PAGE'], self.calculate_start(page))
         result = HTTP.get(url)
         self.__full_collection(result)
+        self.__save_collection(result)
 
     @staticmethod
     def calculate_start(page):
@@ -39,6 +44,17 @@ class YuShuBook(object):
         if data:
             self.total = data['total']
             self.books = data['books']
+
+    def __save_single(self, data):
+        if not Book.query.filter_by(isbn=data['isbn']).first():
+            book = Book()
+            book.set_attr(data)
+            db.session.add(book)
+            db.session.commit()
+
+    def __save_collection(self, data):
+        for book in data['books']:
+            self.__save_single(book)
 
     @property
     def first(self):
